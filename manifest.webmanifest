@@ -1,0 +1,17 @@
+{
+  "name": "The Carolina Curiosity Project",
+  "short_name": "Carolina Curiosity",
+  "description": "Curated adventures within roughly two hours of Belmont, North Carolina.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5edd9",
+  "theme_color": "#163d2a",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
