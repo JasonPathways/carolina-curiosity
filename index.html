@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#163d2a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Carolina Curiosity">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Carolina Curiosity</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+<header class="top"><div style="font-size:11px;letter-spacing:.25em;text-transform:uppercase;opacity:.75">The Carolina</div><div class="serif title">Curiosity Project</div><div class="sub">100 adventures within roughly two hours of Belmont, NC</div></header>
+
+<section id="discover" class="screen active">
+<div class="serif" style="font-size:30px">Where will curiosity take you?</div><p class="muted">Filter the database or let the app choose for you.</p>
+<div class="cats">
+<button class="cat" data-cat="waterfalls"><span class="emoji">💧</span><b>Waterfalls</b></button>
+<button class="cat" data-cat="towns"><span class="emoji">🏘️</span><b>Small Towns</b></button>
+<button class="cat" data-cat="outdoors"><span class="emoji">🌲</span><b>Outdoors</b></button>
+<button class="cat" data-cat="history"><span class="emoji">🏛️</span><b>History</b></button>
+<button class="cat" data-cat="culture"><span class="emoji">🎵</span><b>Culture & Quirky</b></button>
+<button class="cat" id="surpriseCat"><span class="emoji">🧭</span><b>Surprise Me</b></button>
+</div>
+<div class="card" style="margin-top:14px">
+<input id="search" type="search" placeholder="Search places, towns, adventures...">
+<div class="grid2" style="margin-top:10px"><div><label>Maximum drive</label><select id="drive"><option value="120">2 hours</option><option value="90">90 minutes</option><option value="60">1 hour</option><option value="35">35 minutes</option></select></div><div><label>Cost</label><select id="cost"><option value="any">Any</option><option value="free">Free / low cost</option><option value="paid">Paid</option></select></div></div>
+<div class="grid2" style="margin-top:10px"><div><label>Difficulty</label><select id="difficulty"><option value="any">Any</option><option value="easy">Easy</option><option value="moderate">Moderate+</option></select></div><div><label>Time</label><select id="time"><option value="any">Any</option><option value="short">2–4 hours</option><option value="half">Half-day</option><option value="full">Full day</option></select></div></div>
+<div style="margin-top:10px;font-size:14px"><label style="display:block;color:var(--ink)"><input id="dog" type="checkbox" style="width:auto"> Dog-friendly only</label><label style="display:block;color:var(--ink);margin-top:7px"><input id="unvisited" type="checkbox" style="width:auto"> Hide completed adventures</label></div>
+<div class="grid2" style="margin-top:12px"><button id="surprise" class="btn primary">Choose for me</button><button id="favOnly" class="btn">♥ Favorites</button></div>
+</div>
+<div class="row" style="margin-top:18px"><b>Adventures</b><span id="count" class="muted"></span></div><div id="list" class="list"></div>
+</section>
+
+<section id="scratch" class="screen"><button class="btn" onclick="show('discover')">← Discover</button><div style="text-align:center;margin:18px 0"><div style="font-size:11px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase">Scratch & Discover</div><div class="serif" style="font-size:30px">Your adventure awaits</div></div><div class="scratch" id="scratchBox"><div id="reveal" class="reveal"></div><canvas id="scratchCanvas"></canvas></div><button id="scratchGuide" class="btn primary full" style="margin-top:12px;display:none">Open adventure guide</button></section>
+
+<section id="details" class="screen" style="padding:0"><div class="detailHero"><button class="btn back" onclick="show('discover')">←</button><button id="heroFav" class="fav" style="position:absolute;right:14px;top:14px;color:white;z-index:2">♡</button><div id="dcat" style="font-size:11px;letter-spacing:.2em;text-transform:uppercase"></div><div id="dname" class="serif" style="font-size:38px;line-height:1"></div><div id="dplace" style="font-size:14px;opacity:.82;margin-top:5px"></div></div><div style="padding:18px"><div id="dchips" class="chips"></div><div class="card" style="margin-top:14px"><b>Curiosity mission</b><div id="dmission" style="margin-top:7px"></div></div><div class="card" style="margin-top:10px"><b>Picnic / food idea</b><div id="dfood" style="margin-top:7px"></div></div><div class="card" style="margin-top:10px"><b>Bonus stop</b><div id="dbonus" style="margin-top:7px"></div></div><div class="card" style="margin-top:10px"><b>Rainy-day backup</b><div id="drain" style="margin-top:7px"></div></div><div class="grid2" style="margin-top:12px"><button id="directions" class="btn primary">Directions</button><button id="official" class="btn">Official info</button></div><div class="grid2" style="margin-top:10px"><button id="complete" class="btn">Mark complete</button><button id="favorite" class="btn">♡ Save</button></div><div style="margin-top:12px"><button id="rate" class="btn full">☆ Rate this adventure</button><div id="stars" style="text-align:center;font-size:30px;margin-top:8px"></div></div></div></section>
+
+<section id="saved" class="screen"><div class="serif" style="font-size:30px">Saved Adventures</div><p class="muted">Favorites for another day.</p><div id="savedList" class="list"></div></section>
+<section id="passport" class="screen"><div class="serif" style="font-size:30px">My Passport</div><p class="muted">Every completed adventure adds to your story.</p><div class="card"><div class="muted">Progress</div><div class="serif" style="font-size:38px"><span id="doneNum">0</span> / 100</div><div class="progress"><div id="pfill"></div></div></div><div style="margin-top:18px"><b>Badges</b><div id="badges" class="badges" style="margin-top:9px"></div></div><div style="margin-top:18px"><b>Completed adventures</b><div id="doneList" class="list"></div></div></section>
+
+<nav class="bottom"><button class="nav active" data-s="discover">⌕<br>Discover</button><button class="nav" data-s="scratch">✧<br>Adventure</button><button class="nav" data-s="saved">♥<br>Saved</button><button class="nav" data-s="passport">▣<br>Passport</button></nav>
+</div>
+<script src="data1.js"></script><script src="data2.js"></script><script src="data3.js"></script><script src="data4.js"></script><script src="data5.js"></script><script src="data6.js"></script><script src="data7.js"></script><script src="data8.js"></script><script src="data9.js"></script><script src="data10.js"></script><script src="app.js"></script></body></html>
