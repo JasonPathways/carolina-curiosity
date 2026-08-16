@@ -15,7 +15,7 @@ const server=http.createServer((req,res)=>{
 
 function assert(cond,msg){if(!cond)throw new Error(msg)}
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-async function waitFor(fn,timeout=6000){const start=Date.now();while(Date.now()-start<timeout){try{if(fn())return}catch{}await wait(50)}throw new Error('Timed out waiting for app readiness')}
+async function waitFor(fn,timeout=6000){const start=Date.now();while(Date.now()-start<timeout){try{if(fn())return}catch{}await wait(25)}throw new Error('Timed out waiting for app readiness')}
 
 (async()=>{
   await new Promise(r=>server.listen(8123,'127.0.0.1',r));
@@ -42,10 +42,12 @@ async function waitFor(fn,timeout=6000){const start=Date.now();while(Date.now()-
   // 1 Search, including hidden-category reset
   const waterfall=d.querySelector('.cat[data-cat="waterfalls"]'); waterfall.click();
   const search=d.getElementById('search'); search.value='Belmont Abbey'; search.dispatchEvent(new w.Event('input',{bubbles:true}));
-  assert(w.state?.cat==='all' || d.getElementById('count').textContent!=='0 options','Search did not clear category restriction');
   assert(d.getElementById('drive').value==='999','Search did not reset drive to all adventures');
-  assert(d.querySelectorAll('#list .item').length>=1,'Search returned no Belmont Abbey result');
-  pass('Search works and clears hidden category/favorites distance restrictions');
+  assert(d.getElementById('favOnly').textContent==='♥ Favorites','Search did not clear favorites-only state');
+  const searchItems=[...d.querySelectorAll('#list .item')];
+  assert(searchItems.length>=1,'Search returned no Belmont Abbey result');
+  assert(searchItems.some(x=>x.textContent.toLowerCase().includes('belmont abbey')),'Search result did not contain Belmont Abbey after category reset');
+  pass('Search works and clears hidden category/favorites/distance restrictions');
   search.value=''; search.dispatchEvent(new w.Event('input',{bubbles:true}));
 
   // 2 All five planner destinations x 3 pace x 3 food x dog yes/no = 90 builds
@@ -59,6 +61,7 @@ async function waitFor(fn,timeout=6000){const start=Date.now();while(Date.now()-
     d.getElementById('planFood').value=food;
     d.getElementById('planDog').checked=dog;
     d.getElementById('buildDay').click();
+    await waitFor(()=>d.getElementById('destinationChoices'));
     const html=d.getElementById('planResult').innerHTML;
     assert(html.length>300,`Empty plan for ${dest}/${pace}/${food}/${dog}`);
     assert(!html.includes('>MEAL<')&&!html.includes('MEAL'),`Unresolved MEAL placeholder for ${dest}/${pace}/${food}/${dog}`);
@@ -74,6 +77,7 @@ async function waitFor(fn,timeout=6000){const start=Date.now();while(Date.now()-
 
   // 3 Map links
   d.getElementById('planDestination').value='west_jefferson';d.getElementById('planFood').value='either';d.getElementById('planDog').checked=true;d.getElementById('buildDay').click();
+  await waitFor(()=>d.getElementById('destinationChoices'));
   const maps=[...d.querySelectorAll('#planResult a')].filter(a=>a.textContent.includes('Map this stop'));
   assert(maps.length>=5,'Too few map links on a full plan');
   for(const a of maps)assert(a.href.startsWith('https://www.google.com/maps/search/'),'Invalid map URL: '+a.href);
@@ -86,16 +90,19 @@ async function waitFor(fn,timeout=6000){const start=Date.now();while(Date.now()-
 
   // 5 Favorites/completed/rating/passport regression
   w.choose(1); w.renderDetails(); w.show('details');
-  d.getElementById('favorite').click(); assert(w.state.favorites.has(1),'Favorite did not save');
-  d.getElementById('complete').click(); assert(w.state.completed.has(1),'Complete did not save');
-  w.renderStars(); const star4=d.querySelector('[data-star="4"]'); assert(star4,'Rating stars missing'); star4.click(); assert(w.state.ratings.get(1)===4,'4-star rating did not save');
+  d.getElementById('favorite').click();
+  assert(JSON.parse(w.localStorage.getItem('cc_favorites')||'[]').includes(1),'Favorite did not save');
+  d.getElementById('complete').click();
+  assert(JSON.parse(w.localStorage.getItem('cc_completed')||'[]').includes(1),'Complete did not save');
+  w.renderStars(); const star4=d.querySelector('[data-star="4"]'); assert(star4,'Rating stars missing'); star4.click();
+  assert(Number(JSON.parse(w.localStorage.getItem('cc_ratings')||'{}')['1'])===4,'4-star rating did not save');
   w.show('saved'); assert(d.querySelectorAll('#savedList .savedPick').length>=1,'Saved screen missing favorite');
   w.show('passport'); assert(d.getElementById('doneNum').textContent==='1','Passport progress did not update');
-  assert(w.localStorage.getItem('cc_favorites')&&w.localStorage.getItem('cc_completed')&&w.localStorage.getItem('cc_ratings'),'Persistence keys not written');
   pass('Favorites, completion, rating, Saved and Passport still work');
 
   // 6 Basic DOM integrity/no duplicate planner result sections
-  w.show('planner'); d.getElementById('buildDay').click(); d.getElementById('buildDay').click();
+  w.show('planner'); d.getElementById('buildDay').click(); await waitFor(()=>d.getElementById('destinationChoices'));
+  d.getElementById('buildDay').click(); await wait(20);
   assert(d.querySelectorAll('#planResult #destinationChoices').length===1,'Duplicate destination choice blocks after rebuild');
   assert(d.querySelectorAll('#planResult #lunchChoices').length<=1,'Duplicate lunch choice blocks after rebuild');
   pass('Repeated itinerary builds do not accumulate duplicate choice blocks');
