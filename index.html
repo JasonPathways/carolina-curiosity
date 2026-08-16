@@ -27,8 +27,8 @@
 <button class="cat" id="surpriseCat"><span class="emoji">🧭</span><b>Surprise Me</b></button>
 </div>
 <div class="card" style="margin-top:14px">
-<input id="search" type="search" placeholder="Search places, towns, adventures...">
-<div class="grid2" style="margin-top:10px"><div><label>Maximum drive</label><select id="drive"><option value="120">2 hours</option><option value="90">90 minutes</option><option value="60">1 hour</option><option value="35">35 minutes</option></select></div><div><label>Cost</label><select id="cost"><option value="any">Any</option><option value="free">Free / low cost</option><option value="paid">Paid</option></select></div></div>
+<input id="search" type="search" aria-label="Search adventures" placeholder="Search places, towns, adventures...">
+<div class="grid2" style="margin-top:10px"><div><label>Maximum drive</label><select id="drive"><option value="999" selected>All adventures</option><option value="120">2 hours</option><option value="90">90 minutes</option><option value="60">1 hour</option><option value="35">35 minutes</option></select></div><div><label>Cost</label><select id="cost"><option value="any">Any</option><option value="free">Free / low cost</option><option value="paid">Paid</option></select></div></div>
 <div class="grid2" style="margin-top:10px"><div><label>Difficulty</label><select id="difficulty"><option value="any">Any</option><option value="easy">Easy</option><option value="moderate">Moderate+</option></select></div><div><label>Time</label><select id="time"><option value="any">Any</option><option value="short">2–4 hours</option><option value="half">Half-day</option><option value="full">Full day</option></select></div></div>
 <div style="margin-top:10px;font-size:14px"><label style="display:block;color:var(--ink)"><input id="dog" type="checkbox" style="width:auto"> Dog-friendly only</label><label style="display:block;color:var(--ink);margin-top:7px"><input id="unvisited" type="checkbox" style="width:auto"> Hide completed adventures</label></div>
 <div class="grid2" style="margin-top:12px"><button id="surprise" class="btn primary">Choose for me</button><button id="favOnly" class="btn">♥ Favorites</button></div>
@@ -45,4 +45,26 @@
 
 <nav class="bottom"><button class="nav active" data-s="discover">⌕<br>Discover</button><button class="nav" data-s="scratch">✧<br>Adventure</button><button class="nav" data-s="saved">♥<br>Saved</button><button class="nav" data-s="passport">▣<br>Passport</button></nav>
 </div>
-<script src="data1.js"></script><script src="data2.js"></script><script src="data3.js"></script><script src="data4.js"></script><script src="data5.js"></script><script src="data6.js"></script><script src="data7.js"></script><script src="data8.js"></script><script src="data9.js"></script><script src="data10.js"></script><script src="app.js"></script></body></html>
+<script src="data1.js"></script><script src="data2.js"></script><script src="data3.js"></script><script src="data4.js"></script><script src="data5.js"></script><script src="data6.js"></script><script src="data7.js"></script><script src="data8.js"></script><script src="data9.js"></script><script src="data10.js"></script><script src="app.js"></script>
+<script>
+filtered=function(){
+  const q=get('search').value.trim().toLowerCase();
+  const max=+get('drive').value,cost=get('cost').value,diff=get('difficulty').value,t=get('time').value,dog=get('dog').checked,unvisited=get('unvisited').checked;
+  return ADVENTURES.filter(a=>{
+    const haystack=[a.name,a.primary,a.town,a.state,a.category,a.mission,a.bonus,a.food,a.rain].filter(Boolean).join(' ').toLowerCase();
+    return (state.cat==='all'||a.categoryGroup===state.cat)&&a.drive<=max&&(cost==='any'||(cost==='free'?isFree(a.cost):!isFree(a.cost)))&&(diff==='any'||(diff==='easy'?easy(a.difficulty):!easy(a.difficulty)))&&(t==='any'||timeGroup(a.time)===t)&&(!dog||a.dogOk)&&(!unvisited||!state.completed.has(a.id))&&(!state.favOnly||state.favorites.has(a.id))&&(!q||haystack.includes(q));
+  });
+};
+const searchBox=get('search');
+searchBox.addEventListener('input',()=>{
+  if(searchBox.value.trim()){
+    state.cat='all';
+    state.favOnly=false;
+    get('favOnly').textContent='♥ Favorites';
+    get('drive').value='999';
+  }
+  renderList();
+});
+renderList();
+</script>
+</body></html>
