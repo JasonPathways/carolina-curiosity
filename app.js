@@ -30,3 +30,28 @@ function renderStars(){let r=state.selected?state.ratings.get(state.selected.id)
 function renderSaved(){let arr=ADVENTURES.filter(a=>state.favorites.has(a.id));get('savedList').innerHTML=arr.length?arr.map(a=>`<button class="card item savedPick" data-id="${a.id}"><div class="serif" style="font-size:21px">${a.name}</div><div class="muted">${a.town}, ${a.state} · ~${a.drive} min</div></button>`).join(''):'<div class="card">Save adventures with the ♥ button and they will appear here.</div>';document.querySelectorAll('.savedPick').forEach(b=>b.onclick=()=>choose(+b.dataset.id))}
 function renderPassport(){let done=ADVENTURES.filter(a=>state.completed.has(a.id));get('doneNum').textContent=done.length;get('pfill').style.width=(done.length/100*100)+'%';let groups=[...new Set(done.map(a=>a.categoryGroup))],defs={waterfalls:['💧','Waterfall Hunter'],towns:['🏘️','Town Explorer'],outdoors:['🌲','Trail Seeker'],history:['🏛️','History Seeker'],culture:['🎵','Culture Curious'],other:['🧭','Curiosity Collector']};get('badges').innerHTML=Object.entries(defs).map(([k,v])=>`<div class="badge" style="opacity:${groups.includes(k)?1:.3}"><div style="font-size:29px">${v[0]}</div><div style="font-size:11px;margin-top:6px">${v[1]}</div></div>`).join('');get('doneList').innerHTML=done.length?done.map(a=>`<div class="card row"><div><div class="serif" style="font-size:19px">${a.name}</div><div class="muted" style="font-size:13px">${a.town}, ${a.state}</div></div><div>${state.ratings.get(a.id)?'★'.repeat(state.ratings.get(a.id)):'✓'}</div></div>`).join(''):'<div class="card">Complete your first adventure and it will appear here.</div>'}
 renderList(); if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+
+(function initDayPlanner(){
+  const discover=get('discover'), list=get('list');
+  const launch=document.createElement('div');
+  launch.className='card';
+  launch.style.marginTop='14px';
+  launch.innerHTML='<div class="serif" style="font-size:23px">Plan My Day</div><div class="muted" style="margin:5px 0 11px">Choose a destination and let Carolina Curiosity build a full-day excursion.</div><button id="openPlanner" class="btn primary full">Build a full-day excursion</button>';
+  discover.insertBefore(launch,list.previousElementSibling);
+
+  const planner=document.createElement('section');
+  planner.id='planner'; planner.className='screen';
+  planner.innerHTML=`<button class="btn" onclick="show('discover')">← Discover</button>
+    <div class="serif" style="font-size:30px;margin-top:18px">Plan My Day</div>
+    <p class="muted">Start with five pilot destinations. Pick the pace, food style, and whether the dog is coming.</p>
+    <div class="card">
+      <label for="planDestination">Where do you want to go?</label>
+      <select id="planDestination"><option value="little_switzerland">Little Switzerland / Tom’s Creek Falls</option><option value="asheville">Asheville</option><option value="boone">Boone / Blowing Rock</option><option value="charlotte">Charlotte</option><option value="west_jefferson">West Jefferson, NC</option></select>
+      <div class="grid2" style="margin-top:10px"><div><label for="planPace">What kind of day?</label><select id="planPace"><option value="relaxed">Relaxed</option><option value="balanced" selected>Balanced</option><option value="packed">Pack it in</option></select></div><div><label for="planFood">Food preference</label><select id="planFood"><option value="picnic">Picnic</option><option value="restaurant">Local restaurant</option><option value="either" selected>Either</option></select></div></div>
+      <label style="display:block;color:var(--ink);margin-top:12px"><input id="planDog" type="checkbox" style="width:auto"> 🐾 Dog with us?</label>
+      <button id="buildDay" class="btn primary full" style="margin-top:14px">Build My Day</button>
+    </div>
+    <div id="planResult"></div>`;
+  get('scratch').parentNode.insertBefore(planner,get('scratch'));
+  const script=document.createElement('script'); script.src='./planner.js'; document.body.appendChild(script);
+})();
