@@ -1,5 +1,5 @@
 // Race-safe enhancement layer for Plan My Day.
-// Uses event delegation so the recommendation/lunch cards render on the very first build,
+// Uses event delegation so recommendation/lunch cards render on the very first build,
 // regardless of whether planner.js or planner-choices.js finished attaching first.
 document.addEventListener('click',e=>{
   const btn=e.target.closest?.('#buildDay');
@@ -14,3 +14,11 @@ document.addEventListener('click',e=>{
     if(typeof renderDestinationChoices==='function')renderDestinationChoices(key);
   },0);
 });
+
+// Load the editorial curation layer after the planner UI exists.
+if(!document.querySelector('script[data-planner-curation]')){
+  const s=document.createElement('script');
+  s.src='./planner-curation.js';
+  s.dataset.plannerCuration='true';
+  document.body.appendChild(s);
+}
